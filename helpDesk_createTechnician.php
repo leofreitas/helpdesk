@@ -16,8 +16,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
+use Gibbon\Forms\Form;
 
-@session_start();
+// get session object
+$session = $container->get('session');
+
 
 include __DIR__ . '/moduleFunctions.php';
 
@@ -30,7 +33,7 @@ if (isActionAccessible($guid, $connection2, "/modules/Help Desk/helpDesk_manageT
     $page->breadcrumbs->add(__('Create Technician'));
 
     if (isset($_GET['return'])) {
-        returnProcess($guid, $_GET['return'], $_SESSION[$guid]["absoluteURL"] . "/index.php?q=/modules/Help Desk/helpDesk_manageTechnicians.php", null);
+        returnProcess($guid, $_GET['return'], $session->get("absoluteURL") . "/index.php?q=/modules/Help Desk/helpDesk_manageTechnicians.php", null);
     }
 
     $allPeople = getAllPeople($connection2, true);
@@ -97,5 +100,14 @@ if (isActionAccessible($guid, $connection2, "/modules/Help Desk/helpDesk_manageT
         </table>
     </form>
 <?php
+
+    $form = Form::create('action', $session->get('absoluteURL').'/modules/'.$session->get('module').'/helpDesk_createTechnicianProcess.php');
+       
+    
+        $row = $form->addRow();
+            $row->addFooter();
+            $row->addSubmit();
+
+        echo $form->getOutput();
 }
 ?>

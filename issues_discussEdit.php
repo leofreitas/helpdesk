@@ -17,71 +17,49 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-@session_start() ;
+use Gibbon\Forms\Form;
+
+// get session object
+$session = $container->get('session');
 
 include __DIR__ . '/moduleFunctions.php';
 
-if (isActionAccessible($guid, $connection2, "/modules/Help Desk/issues_view.php") == false || !(isPersonsIssue($connection2, $_GET["issueID"], $_SESSION[$guid]["gibbonPersonID"]) || getPermissionValue($connection2, $_SESSION[$guid]["gibbonPersonID"], "fullAccess"))) {
+$issueID = $_GET["issueID"] ?? '';
+
+if (isActionAccessible($guid, $connection2, "/modules/Help Desk/issues_view.php") == false || getPermissionValue($connection2, $session->get('gibbonPersonID'), "fullAccess")) {
     //Acess denied
     $page->addError(__('You do not have access to this action.'));
 } else {
-
-    $issueID = null;
-    if (isset($_GET["issueID"])) {
-        $issueID = $_GET["issueID"];
-    } else {
+    if (!isPersonsIssue($connection2, $issueID, $session->get('gibbonPersonID'))){
         $page->addError(__('No issue selected.'));
-        exit();
     }
+    else {
+        //Proceed!
+        $page->breadcrumbs->add(__("Discuss Issue"), 'issues_discussView.php', ['issueID' => $issueID]);
+        $page->breadcrumbs->add(__('Edit Privacy'));
+        
+        $options = array("Everyone" => __("Everyone"), "Related"=>__("Related"), "Owner"=>__("Owner"), "No one"=>__("No one"));
 
-    //Proceed!
-    $page->breadcrumbs->add(__("Discuss Issue"), 'issues_discussView.php', ['issueID' => $issueID]);
-    $page->breadcrumbs->add(__('Edit Privacy'));
-?>
-<form method="post" action="<?php print $_SESSION[$guid]['absoluteURL'] . '    /modules/Help Desk/issues_discussEditProcess.php?issueID=' . $issueID; ?>">
-    <table class='smallIntBorder' cellspacing='0' style="width: 100%">
-        <tr>
-            <td>
-                <b>
-                    <?php print __('Privacy Setting') ." *";?>
-                </b><br>
-            </td>
-            <td class="right">
-                <select name='privacySetting' id='privacySetting' style='width:302px'>
-                    <?php
-                        try {
-                            $data = array("issueID"=>$issueID);
-                            $sql = "SELECT privacySetting FROM helpDeskIssue WHERE issueID=:issueID" ;
-                            $result = $connection2->prepare($sql);
-                            $result->execute($data);
-                        }
-                        catch (PDOException $e) {
-                        }
+        $data = array("issueID" => $issueID);
+        $sql = "SELECT privacySetting FROM helpDeskIssue WHERE issueID=:issueID" ;
+        $result = $connection2->prepare($sql);
+        $result->execute($data);
+        $row = $result->fetch() ;
+        $privacySetting = $row['privacySetting'];
 
-                        $row = $result->fetch() ;
-                        $privacySetting = $row['privacySetting'];
-                        print "<option value='" . $privacySetting . "'>". $privacySetting ."</option>" ;
-                        $options = array("Everyone", "Related", "Owner", "No one");
-                        foreach ($options as $option) {
-                            if ($option != $privacySetting) {
-                                print "<option value='" . $option . "'>". $option ."</option>" ;
-                            }
-                        }
-                    ?>
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <span style="font-size: 90%"><i>* <?php print __("denotes a required field") ; ?></i></span>
-            </td>
-            <td class="right">
-                <input type="hidden" name="address" value="<?php print $_SESSION[$guid]["address"] ?>">
-                <input type="submit" value="<?php print __("Submit") ; ?>">
-            </td>
-        </tr>
-    </table>
-</form>
-<?php
+        $form = Form::create('action', $session->get('absoluteURL').'/modules/'.$session->get('module').'/issues_discussEditProcess.php?issueID='.$issueID);
+     
+        $form->addRow()->addHeading(__('Privacy Setting'));
+
+            $row = $form->addRow();
+                    $row->addLabel('privacySetting', __('Privacy Setting'));
+                    $row->addSelect('privacySetting')->fromArray($options)->selected($privacySetting)->required();
+ 
+            $row = $form->addRow();
+                    $row->addFooter();
+                    $row->addSubmit();
+
+            echo $form->getOutput();
+    }
 }
 ?>

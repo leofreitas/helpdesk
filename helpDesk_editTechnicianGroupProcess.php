@@ -17,6 +17,9 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+// get session object
+//$session = $container->get('session');
+
 include "../../functions.php" ;
 include "../../config.php" ;
 
@@ -104,9 +107,9 @@ if (isActionAccessible($guid, $connection2, "/modules/Help Desk/helpDesk_manageT
     }
 
     //Success 0
-    setLog($connection2, $_SESSION[$guid]["gibbonSchoolYearID"], $gibbonModuleID, $_SESSION[$guid]["gibbonPersonID"], "Technician Group Edited", array("groupID" => $groupID), null);
+    setLog($connection2, $session->get("gibbonSchoolYearID"), $gibbonModuleID, $sesion->get("gibbonPersonID"), "Technician Group Edited", array("groupID" => $groupID), null);
 
-       $URL = $URL . "&return=success0" ;
+    $URL = $URL . "&return=success0" ;
     header("Location: {$URL}");
 }
 ?>

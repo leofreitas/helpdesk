@@ -16,8 +16,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
+use Gibbon\Forms\Form;
 
-@session_start() ;
+// get session object
+$session = $container->get('session');
 
 include __DIR__ . '/moduleFunctions.php';
 
@@ -33,37 +35,21 @@ if (isActionAccessible($guid, $connection2, "/modules/Help Desk/helpDesk_manageT
         $editLink = null;
         if (isset($_GET['groupID'])) {
             $groupID = $_GET['groupID'];
-            $editLink = $_SESSION[$guid]["absoluteURL"] . "/index.php?q=/modules/Help Desk/helpDesk_editTechnicianGroup.php&groupID=$groupID";
+            $editLink = $session->get("absoluteURL") . "/index.php?q=/modules/Help Desk/helpDesk_editTechnicianGroup.php&groupID=$groupID";
         }
         returnProcess($guid, $_GET['return'], $editLink, null);
     }
 
-?>
+    $form = Form::create('action', $session->get('absoluteURL').'/modules/'.$session->get('module').'/helpDesk_createTechnicianGroupProcess.php');
+       
+        $row = $form->addRow();
+    $row->addLabel('groupName', __m('Group Name'));
+    $row->addTextField('groupName')->required();
+    
+        $row = $form->addRow();
+            $row->addFooter();
+            $row->addSubmit();
 
-    <form method = "post" action = "<?php print $_SESSION[$guid]['absoluteURL'] . '/modules/Help Desk/helpDesk_createTechnicianGroupProcess.php' ?>">
-        <table class = 'smallIntBorder' cellspacing = '0' style = "width: 100%">
-            <tr>
-                <td style = 'width: 275px'>
-                    <b><?php print __('Group Name') ?> *</b><br/>
-                </td>
-                <td class = "right">
-                    <input name = "groupName" id = "groupName" maxlength = 55 value = "" type = "text" style = "width: 300px">
-                    <script type = "text/javascript">
-                        var name=new LiveValidation('groupName');
-                        name.add(Validate.Presence);
-                    </script>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <span style = "font-size: 90%"><i>* <?php print __("denotes a required field") ; ?></i></span>
-                </td>
-                <td class="right">
-                    <input type = "submit" value  = "<?php print __("Submit") ; ?>">
-                </td>
-            </tr>
-        </table>
-    </form>
-<?php
+        echo $form->getOutput();
 }
 ?>

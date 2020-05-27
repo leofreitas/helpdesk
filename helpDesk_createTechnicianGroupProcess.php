@@ -20,6 +20,9 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 include "../../functions.php" ;
 include "../../config.php" ;
 
+// get session object
+$session = $container->get('session');
+
 include "./moduleFunctions.php" ;
 
 //Set timezone from session variable
@@ -59,7 +62,7 @@ if (isActionAccessible($guid, $connection2, "/modules/Help Desk/helpDesk_manageT
         }
 
         $groupID = $connection2->lastInsertId();
-        setLog($connection2, $_SESSION[$guid]["gibbonSchoolYearID"], $gibbonModuleID, $_SESSION[$guid]["gibbonPersonID"], "Technician Group Added", array("groupID"=>$groupID), null);
+        setLog($connection2, $session->get("gibbonSchoolYearID"), $gibbonModuleID, $session->get("gibbonPersonID"), "Technician Group Added", array("groupID"=>$groupID), null);
 
         //Success 0
         $URL = $URL."&groupID=$groupID&return=success0" ;

@@ -17,7 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-@session_start() ;
+// get session object
+$session = $container->get('session');
 
 include './modules/Help Desk/moduleFunctions.php';
 
@@ -36,8 +37,8 @@ if (isActionAccessible($guid, $connection2, "/modules/Help Desk/helpDesk_setting
     <form method="post" action="<?php print $_SESSION[$guid]["absoluteURL"] . "/modules/" . $_SESSION[$guid]["module"] . "/helpDesk_settingsProcess.php" ?>">
         <table class='smallIntBorder' cellspacing='0' style="width: 100%">
             <?php
-                $result = getHelpDeskSettings($connection2);
-                while($row = $result->fetch()) {
+                $result = getHelpDeskSettings($connection2); 
+               while($row = $result->fetch()) {
                     print "<tr>";
                         print "<td style='width:275px'>";
                             print "<b>" . __($row["nameDisplay"]) . "</b><br/>";
